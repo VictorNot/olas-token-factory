@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OLAS Token Factory</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 86 120'%3E%3Cpath d='M43 2 82 60 43 118 4 60Z' fill='%237C3AED'/%3E%3Cpath d='M43 2 82 60 43 76 4 60Z' fill='%23A78BFA'/%3E%3Cpath d='M43 76 82 60 43 118Z' fill='%235B21B6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@500&display=swap">
+<style>
+/* Unlock page in Part II's daylight sky: one centred glass card, the Ethereum gem floating above it. One look on purpose. */
+:root {
+  color-scheme: light;
+  --ink: #1B1530; --ink-2: #5E5780; --olas: #7C3AED; --olas-2: #6D28D9; --line: #E4DCF7; --sky-1: #D9D2FA; --sky-2: #EEE9FB; --sky-3: #F8F5FE;
+  --bad: #B42318;
+  --f-display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "Martian Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; min-height: 100%; display: grid; place-items: center; font: 16px/1.5 var(--f-body); color: var(--ink);
+  padding-block: max(24px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: radial-gradient(60% 40% at 78% 18%, rgba(252, 231, 243, 0.9), rgba(252, 231, 243, 0) 70%),
+              radial-gradient(70% 50% at 12% 86%, rgba(224, 231, 255, 0.95), rgba(224, 231, 255, 0) 70%),
+              linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 55%, var(--sky-3) 100%); overflow-x: hidden; }
+.cloud { position: fixed; border-radius: 50%; background: rgba(255, 255, 255, 0.55); filter: blur(28px); pointer-events: none; }
+.c1 { width: 520px; height: 160px; left: -120px; bottom: 12%; }
+.c2 { width: 420px; height: 140px; right: -80px; top: 22%; }
+.c3 { width: 640px; height: 180px; left: 30%; bottom: -60px; }
+main { position: relative; width: min(440px, 100%); display: grid; justify-items: center; gap: 18px; }
+.gem { width: 86px; height: 120px; filter: drop-shadow(0 18px 30px rgba(91, 33, 182, 0.35)); animation: float 5s ease-in-out infinite; }
+.card { width: 100%; padding: 30px 28px 24px; border-radius: 26px; background: rgba(255, 255, 255, 0.86); border: 1px solid rgba(124, 58, 237, 0.14);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 36px 80px -30px rgba(60, 40, 120, 0.45); text-align: center; }
+.eyebrow { margin: 0; font: 650 12px/1.2 var(--f-body); letter-spacing: 0.18em; text-transform: uppercase; color: var(--olas); }
+h1 { margin: 10px 0 8px; font: 800 clamp(32px, 7vw, 42px)/1 var(--f-display); letter-spacing: -0.035em; text-wrap: balance; }
+h1 span { background: linear-gradient(95deg, #7C3AED, #A855F7 55%, #6D28D9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { margin: 0 auto 20px; max-width: 34ch; color: var(--ink-2); font-size: 15.5px; }
+form { display: grid; gap: 12px; text-align: left; }
+label.f { font: 600 13px/1 var(--f-body); color: var(--ink-2); }
+input[type="password"] { width: 100%; padding: 13px 15px; border-radius: 14px; border: 1px solid #D9CCFB; background: #fff; font: 500 16px var(--f-data); color: var(--ink); letter-spacing: 0.02em; }
+input[type="password"]:focus { outline: 3px solid rgba(124, 58, 237, 0.25); border-color: var(--olas); }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); }
+.check input { width: 17px; height: 17px; accent-color: var(--olas); }
+button { margin-top: 4px; padding: 14px 18px; border-radius: 999px; border: 1px solid var(--olas); background: linear-gradient(180deg, #8B5CF6, #7C3AED); color: #fff;
+  font: 650 16px/1 var(--f-body); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(91, 33, 182, 0.6); }
+button:focus-visible { outline: 3px solid rgba(124, 58, 237, 0.35); outline-offset: 2px; }
+button:disabled { opacity: 0.75; cursor: progress; }
+.err { margin: 0; padding: 10px 12px; border-radius: 12px; background: #FEF3F2; border: 1px solid #FECDCA; color: var(--bad); font-size: 14px; }
+.load { margin-top: 18px; display: grid; gap: 7px; }
+.track { height: 6px; border-radius: 4px; background: #EDE6FF; overflow: hidden; }
+#bar { height: 100%; width: 0; background: linear-gradient(90deg, #A78BFA, #7C3AED); transition: width .3s; }
+#pct { font: 500 12px/1 var(--f-data); color: var(--ink-2); }
+.foot { margin: 0; font-size: 13px; color: var(--ink-2); text-align: center; max-width: 38ch; }
+.also { color: var(--olas-2); font-weight: 600; text-decoration: none; }
+.also:hover, .also:focus-visible { text-decoration: underline; }
+[hidden] { display: none !important; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .gem { animation: none; } button { transition: none; } }
+</style>
+</head>
+<body>
+<div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+<main>
+  <svg class="gem" viewBox="0 0 86 120" aria-hidden="true">
+    <path d="M43 2 82 60 43 118 4 60Z" fill="#7C3AED"/>
+    <path d="M43 2 82 60 43 76 4 60Z" fill="#A78BFA"/>
+    <path d="M43 2 43 76 4 60Z" fill="#C4B5FD"/>
+    <path d="M43 76 82 60 43 118Z" fill="#5B21B6"/>
+  </svg>
+  <section class="card" aria-labelledby="t">
+    <p class="eyebrow">Shared privately</p>
+    <h1 id="t">The OLAS <span>token factory</span></h1>
+    <p class="lede">A live look inside the Olas agent economy, built from onchain data as it happens. Enter the password you were given.</p>
+    <form id="form" autocomplete="on">
+      <label class="f" for="pw">Password</label>
+      <input id="pw" name="password" type="password" autocomplete="current-password" required autofocus>
+      <label class="check" for="remember"><input id="remember" type="checkbox" checked> Keep me signed in on this device</label>
+      <p class="err" id="err" role="alert" hidden></p>
+      <button id="go" type="submit">Open the factory</button>
+    </form>
+    <div class="load" aria-live="polite"><div class="track"><div id="bar"></div></div><span id="pct">Loading the factory… 0%</span></div>
+  </section>
+  <p class="foot">No password? Ask the person who shared this link.</p>
+  <p class="foot"><a class="also" href="video.html">Or watch the 7-minute intro film →</a></p>
+</main>
+<script>
+(() => {
+  const SALT = 'KYSfsmrtULWRKi9QqChvow==', IV = 'ilAiNvmy3OTVp2jc', ITER = 600000, SIZE = 7654006;
+  const LS = 'olas-factory-key-e8148135abc5';
+  const $ = (id) => document.getElementById(id);
+  const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const tob64 = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
+  const fail = (msg) => { $('err').hidden = false; $('err').textContent = msg; };
+  if (!window.crypto || !crypto.subtle || typeof DecompressionStream === 'undefined') {
+    fail('This browser cannot open the page. Try a recent version of Chrome, Safari, Firefox or Edge.');
+    $('go').disabled = true;
+    return;
+  }
+  // the encrypted page starts downloading straight away, while the password is typed
+  let got = 0;
+  const progress = () => {
+    const p = Math.min(100, Math.round(got / SIZE * 100));
+    $('bar').style.width = p + '%';
+    $('pct').textContent = p < 100 ? 'Loading the factory… ' + p + '%' : 'Factory loaded. Ready when you are.';
+  };
+  const bundle = (async () => {
+    const r = await fetch('f.bin', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.body || !r.body.getReader) { const b = new Uint8Array(await r.arrayBuffer()); got = b.length; progress(); return b; }
+    const rd = r.body.getReader(), parts = [];
+    for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; progress(); }
+    const out = new Uint8Array(got); let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    progress();
+    return out;
+  })();
+  bundle.catch(() => { $('pct').textContent = 'The page could not be loaded. Check your connection and reload.'; });
+
+  const busy = (on, label) => { $('go').disabled = on; $('go').textContent = on ? label : 'Open the factory'; };
+  async function derive(pw) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: unb64(SALT), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+  }
+  async function openWith(key, remember) {
+    const data = await bundle;
+    const gz = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(IV) }, key, data);
+    const html = await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    if (remember) { try { localStorage.setItem(LS, tob64(await crypto.subtle.exportKey('raw', key))); } catch (e) {} }
+    document.open();
+    document.write(html);
+    document.close();
+  }
+  // signed in on this device before: open without asking
+  let saved = null;
+  try { saved = localStorage.getItem(LS); } catch (e) {}
+  if (saved) {
+    busy(true, 'Opening…');
+    crypto.subtle.importKey('raw', unb64(saved), 'AES-GCM', true, ['decrypt']).then((k) => openWith(k, false))
+      .catch(() => { try { localStorage.removeItem(LS); } catch (e) {} busy(false); });
+  }
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pw = $('pw').value.trim();
+    if (!pw) return;
+    $('err').hidden = true;
+    busy(true, 'Checking the password…');
+    try { await openWith(await derive(pw), $('remember').checked); }
+    catch (err) {
+      busy(false);
+      fail(err && err.name === 'OperationError' ? "That password didn't work. Check it and try again." : 'The page could not be opened. Reload and try again.');
+      $('pw').select();
+    }
+  });
+})();
+</script>
+</body>
+</html>
